@@ -17,9 +17,7 @@ export const App = () => {
   const items = useSelector(getContacts);
   const filterValueReducer = useSelector(getFilterValue);
   const dispatch = useDispatch();
-  const [contacts, setContacts] = useState(items);
 
-  const [filter, setFilter] = useState(filterValueReducer);
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
@@ -37,7 +35,7 @@ export const App = () => {
       case 'number':
         return setNumber(value);
       case 'filter':
-        return setFilter(value);
+        return filterValueReducer(value);
 
       default:
         return;
@@ -47,8 +45,8 @@ export const App = () => {
   const handleSubmit = e => {
     e.preventDefault();
 
-    const contactsNames = contacts.find(contact => contact.name === name);
-    const contactsNumbers = contacts.find(contact => contact.number === number);
+    const contactsNames = items.find(item => item.name === name);
+    const contactsNumbers = items.find(item => item.number === number);
     const contact = { id: nanoid(), name, number };
     if (contactsNames) {
       alert(`${name} is already in contacts`);
@@ -64,31 +62,25 @@ export const App = () => {
 
     dispatch(addContact(contact));
 
-    setContacts(prevContacts => {
-      return [contact, ...prevContacts];
-    });
     return reset();
   };
 
   const contactFilter = () => {
-    const normalizeFilter = filter.toLowerCase();
-    return contacts.filter(contact =>
-      contact.name.toLowerCase().includes(normalizeFilter)
+    const normalizeFilter = filterValueReducer.toLowerCase();
+    return items.filter(item =>
+      item.name.toLowerCase().includes(normalizeFilter)
     );
   };
 
   const searchFilter = e => {
     const value = e.currentTarget.value;
     dispatch(filterChange(value));
-    setFilter(value);
   };
 
   const filteredContacts = contactFilter();
 
   const deleteContact = contactId => {
-    const filtered = items.filter(item => item.id !== contactId);
     dispatch(removeContact(contactId));
-    setContacts(filtered);
   };
 
   return (
@@ -102,7 +94,7 @@ export const App = () => {
           numberValue={number}
         />
         <ContactList contacts={filteredContacts} onClick={deleteContact} />
-        <Filter filterValue={filter} onChange={searchFilter} />
+        <Filter filterValue={filterValueReducer} onChange={searchFilter} />
       </Section>
     </>
   );
